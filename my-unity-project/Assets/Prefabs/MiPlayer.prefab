@@ -1,0 +1,51 @@
+Prefab MiPlayer
+{
+    "m_ObjectHideFlags": 0,
+    "m_PrefabParentObject": null,
+    "m_PrefabInternal": {
+        "m_PrefabInstance": {
+            "m_Transform": {
+                "m_LocalPosition": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "m_LocalRotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "w": 1
+                },
+                "m_LocalScale": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            },
+            "m_Component": [
+                {
+                    "m_Type": "Rigidbody2D",
+                    "m_Enabled": true,
+                    "m_GravityScale": 1,
+                    "m_IsKinematic": false,
+                    "m_CollisionDetection": 0,
+                    "m_SleepMode": 0
+                },
+                {
+                    "m_Type": "BoxCollider2D",
+                    "m_Enabled": true,
+                    "m_IsTrigger": false,
+                    "m_Size": {
+                        "x": 1,
+                        "y": 1
+                    }
+                },
+                {
+                    "m_Type": "PlayerMovement",
+                    "m_Enabled": true,
+                    "Role": "Mi"
+                }
+            ]
+        }
+    }
+}
