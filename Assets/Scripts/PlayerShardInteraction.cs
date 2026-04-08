@@ -17,9 +17,10 @@ public class PlayerShardInteraction : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     
     {
-        if (other.CompareTag("Shard"))
+        Debug.Log("collision");
+        if (other.CompareTag("Mi") || other.CompareTag("Mo"))
         {
-            Destroy(other.gameObject);
+            Destroy(gameObject);
             GameManager.Instance.CollectShard();
         }
     }

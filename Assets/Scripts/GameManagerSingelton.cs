@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     public int shardsCollected = 0;
     public int shardsRequiredPerLevel = 2;
 
+    public ShardUI shardUI;
+    public GameObject completionText;
     void Awake()
     {
         // Singleton pattern
@@ -25,6 +27,7 @@ public class GameManager : MonoBehaviour
     {
         shardsCollected++;
         Debug.Log("Shards: " + shardsCollected);
+        shardUI.UpdateText(shardsCollected);
 
         if (shardsCollected >= shardsRequiredPerLevel)
         {
@@ -34,7 +37,9 @@ public class GameManager : MonoBehaviour
 
     void LevelComplete()
     {
-        shardsCollected = 0; // reset for next level
+        Debug.Log("Game Win");
+        completionText.SetActive(true);
+        //shardsCollected = 0; // reset for next level
         // load next scene:
         // SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
