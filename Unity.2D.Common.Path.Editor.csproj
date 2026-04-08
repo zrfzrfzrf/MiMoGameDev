@@ -59,7 +59,7 @@
     <UnityVersion>2022.3.62f3</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\aqwus\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.2.1\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Users\elino\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.2.1\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
@@ -68,8 +68,8 @@
     <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\Selection\ISelector.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\EditorTool\GenericScriptablePathInspector.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\EditablePath\EditablePathController.cs" />
-    <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\EditorTool\GenericScriptablePath.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\EditablePath\IEditablePath.cs" />
+    <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\EditorTool\GenericScriptablePath.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\IMGUI\CreatePointAction.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\IMGUI\GUIFramework\HoveredControlAction.cs" />
     <Compile Include="Library\PackageCache\com.unity.2d.common@8.1.0\Path\Editor\IMGUI\GUIFramework\SliderAction.cs" />
