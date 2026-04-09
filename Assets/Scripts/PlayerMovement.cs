@@ -1,6 +1,8 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class PlayerMovement : MonoBehaviour
 {
     public enum PlayerRole { Mi, Mo }
@@ -11,19 +13,39 @@ public class PlayerMovement : MonoBehaviour
     public float sprintMultiplier = 2f; // 冲刺速度倍数
 
     private Rigidbody2D rb;
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
     private Vector2 moveInput;
     private bool isSprinting;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         rb.gravityScale = 0f; // top-down 不要重力
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void Update()
     {
         moveInput = ReadInput();
         isSprinting = IsSprinting();
+
+        bool isMoving = moveInput != Vector2.zero;
+        animator.SetBool("isMoving", isMoving);
+        animator.SetFloat("moveX", moveInput.x);
+        animator.SetFloat("moveY", moveInput.y);
+        animator.SetBool("isSprinting", isSprinting);
+
+        // 根据左右输入决定朝向
+        if (moveInput.x > 0.1f)
+        {
+            spriteRenderer.flipX = false;   // 朝右
+        }
+        else if (moveInput.x < -0.1f)
+        {
+            spriteRenderer.flipX = true;    // 朝左
+        }
     }
 
     private void FixedUpdate()
