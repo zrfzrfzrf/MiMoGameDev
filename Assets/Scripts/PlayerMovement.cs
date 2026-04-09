@@ -10,6 +10,9 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 3f;
     public float sprintMultiplier = 2f;
 
+    [Header("Input")]
+    public KeyCode pullKey = KeyCode.RightAlt;
+
     [HideInInspector] public Vector2 currentInput;
     [HideInInspector] public bool isPulling;
 
@@ -24,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         currentInput = ReadInput();
-        isPulling = role == PlayerRole.Mo && Input.GetKey(KeyCode.RightAlt);
+        isPulling = role == PlayerRole.Mo && Input.GetKey(pullKey);
     }
 
     private void FixedUpdate()
