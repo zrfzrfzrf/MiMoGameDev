@@ -7,29 +7,35 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Movement")]
     public PlayerRole role = PlayerRole.Mi;
-    public float moveSpeed = 5f;
-    public float sprintMultiplier = 2f; // 冲刺速度倍数
+    public float moveSpeed = 3f;
+    public float sprintMultiplier = 2f;
+
+    [HideInInspector] public Vector2 currentInput;
+    [HideInInspector] public bool isPulling;
 
     private Rigidbody2D rb;
-    private Vector2 moveInput;
-    private bool isSprinting;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = 0f; // top-down 不要重力
+        rb.gravityScale = 0f;
     }
 
     private void Update()
     {
-        moveInput = ReadInput();
-        isSprinting = IsSprinting();
+        currentInput = ReadInput();
+        isPulling = role == PlayerRole.Mo && Input.GetKey(KeyCode.RightAlt);
     }
 
     private void FixedUpdate()
     {
-        float currentSpeed = isSprinting ? moveSpeed * sprintMultiplier : moveSpeed;
-        rb.velocity = moveInput * currentSpeed;
+        float currentSpeed = moveSpeed;
+        if (role == PlayerRole.Mi && Input.GetKey(KeyCode.LeftShift))
+            currentSpeed *= sprintMultiplier;
+        else if (role == PlayerRole.Mo && Input.GetKey(KeyCode.RightShift))
+            currentSpeed *= sprintMultiplier;
+
+        rb.velocity = currentInput * currentSpeed;
     }
 
     private Vector2 ReadInput()
@@ -49,10 +55,5 @@ public class PlayerMovement : MonoBehaviour
         float x = (Input.GetKey(KeyCode.L) ? 1f : 0f) - (Input.GetKey(KeyCode.J) ? 1f : 0f);
         float y = (Input.GetKey(KeyCode.I) ? 1f : 0f) - (Input.GetKey(KeyCode.K) ? 1f : 0f);
         return new Vector2(x, y).normalized;
-    }
-
-    private bool IsSprinting()
-    {
-        return role == PlayerRole.Mi ? Input.GetKey(KeyCode.LeftShift) : Input.GetKey(KeyCode.RightShift);
     }
 }
