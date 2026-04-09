@@ -6,15 +6,9 @@ public class SyncedObject : MonoBehaviour
     [Header("Linked Object")]
     public SyncedObject linkedObject;
 
-    [Header("Sync Settings")]
-    public bool syncPosition = true;
-    public bool syncRotation = true;
-    public bool syncVelocity = true;
-
     private Rigidbody2D _rb;
-    private bool _isSyncing = false;
-    private Vector2 _previousPosition;
-    private float _previousRotation;
+    private Vector2 _relativeOffset; // 初始相对位置偏移
+    private bool _isMaster = false;   // 标记我是否是当前被操控的主体
 
     private void Awake()
     {
@@ -23,52 +17,46 @@ public class SyncedObject : MonoBehaviour
 
     private void Start()
     {
-        _previousPosition = _rb.position;
-        _previousRotation = _rb.rotation;
+        if (linkedObject != null)
+        {
+            // 计算初始时对方相对于我的位置
+            // 比如我在(0,0)，对方在(10,0)，偏移量就是(10,0)
+            _relativeOffset = (Vector2)linkedObject.transform.position - (Vector2)transform.position;
+        }
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
-        if (_isSyncing) return;
         if (linkedObject == null) return;
 
-        Vector2 deltaPosition = _rb.position - _previousPosition;
-        float deltaRotation = _rb.rotation - _previousRotation;
-
-        _previousPosition = _rb.position;
-        _previousRotation = _rb.rotation;
-
-        // Only sync if something actually moved
-        if (deltaPosition == Vector2.zero && deltaRotation == 0f && !syncVelocity) return;
-
-        linkedObject.ApplySync(
-            deltaPosition,
-            deltaRotation,
-            _rb.velocity,
-            _rb.angularVelocity
-        );
+        // 【核心逻辑】检查我是否正在被推或拉（BodyType 变为 Dynamic 说明玩家在动我）
+        if (_rb.bodyType == RigidbodyType2D.Dynamic)
+        {
+            _isMaster = true;
+            // 告诉对方：我动了，你快“瞬移”到对应的相对位置去
+            linkedObject.ReceiveMagicSync((Vector2)transform.position + _relativeOffset);
+        }
+        else
+        {
+            _isMaster = false;
+        }
     }
 
-    public void ApplySync(Vector2 deltaPosition, float deltaRotation, Vector2 velocity, float angularVelocity)
+    // “魔法同步”函数：无视物理，直接定位
+    public void ReceiveMagicSync(Vector2 targetPosition)
     {
-        _isSyncing = true;
-
-        if (syncPosition)
+        // 如果我此时不是 Master（说明我没被玩家动），我就作为跟随者
+        if (!_isMaster)
         {
-            _rb.MovePosition(_rb.position + deltaPosition);
-        }
+            // 1. 确保跟随者是 Kinematic，这样它才能穿墙、无视障碍物
+            if (_rb.bodyType != RigidbodyType2D.Kinematic)
+            {
+                _rb.velocity = Vector2.zero;
+                _rb.bodyType = RigidbodyType2D.Kinematic;
+            }
 
-        if (syncRotation)
-        {
-            _rb.MoveRotation(_rb.rotation + deltaRotation);
+            // 2. 强制同步位置（MovePosition 会保证平滑但无视阻碍）
+            _rb.MovePosition(targetPosition);
         }
-
-        if (syncVelocity)
-        {
-            _rb.velocity = velocity;
-            _rb.angularVelocity = angularVelocity;
-        }
-
-        _isSyncing = false;
     }
 }
