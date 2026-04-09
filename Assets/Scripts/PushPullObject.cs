@@ -1,66 +1,76 @@
 using UnityEngine;
 
-public class PullObject : MonoBehaviour
+public class PushPullObject : MonoBehaviour
 {
-    [Header("Settings")]
-    public float pullDistance = 1.5f; 
-    // 技巧：pullSpeed 设为 -1 表示完全同步玩家速度
-    public float pullSpeed = -1f; 
-    public float allowedAngle = 0.4f; 
+    public float pullDistance = 1.3f;
+    public float allowedAngle = 0.4f;
 
     private Rigidbody2D rb;
     private PlayerMovement moPlayer;
+    private PlayerMovement miPlayer;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
-        // 关键：防止拉动时箱子乱转
+        // 初始设为运动学，绝对不动
+        rb.bodyType = RigidbodyType2D.Kinematic;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         
-        // 找到 Mo
-        PlayerMovement[] players = FindObjectsOfType<PlayerMovement>();
-        foreach(var p in players)
+        // 建议在 Inspector 里手动指定，或者这样寻找：
+        foreach (var p in FindObjectsOfType<PlayerMovement>())
         {
-            if(p.role == PlayerMovement.PlayerRole.Mo) {
-                moPlayer = p;
-                break;
-            }
+            if (p.role == PlayerMovement.PlayerRole.Mi) miPlayer = p;
+            if (p.role == PlayerMovement.PlayerRole.Mo) moPlayer = p;
         }
     }
 
-    private void FixedUpdate() // 处理物理位移建议用 FixedUpdate
+    private void FixedUpdate()
     {
-        if (moPlayer == null) return;
+        bool isBeingInteracted = false;
+        Vector2 targetVel = Vector2.zero;
 
-        float dist = Vector2.Distance(transform.position, moPlayer.transform.position);
-        Vector2 directionToPlayer = ((Vector2)moPlayer.transform.position - (Vector2)transform.position).normalized;
-        Vector2 input = moPlayer.currentInput;
-
-        // 拉取判定
-        if (dist <= pullDistance && moPlayer.isPulling && input.magnitude > 0.1f)
+        // --- Mo 的拉取逻辑 ---
+        if (moPlayer != null)
         {
-            if (Vector2.Dot(input, directionToPlayer) > allowedAngle)
+            float dist = Vector2.Distance(rb.position, moPlayer.GetComponent<Rigidbody2D>().position);
+            Vector2 dirToPlayer = (moPlayer.GetComponent<Rigidbody2D>().position - rb.position).normalized;
+
+            if (moPlayer.isPulling && dist <= pullDistance && Vector2.Dot(moPlayer.currentInput, dirToPlayer) > allowedAngle)
             {
-                // --- 解决速度慢的核心逻辑 ---
-                
-                // 1. 获取 Mo 当前的实际速度（包含冲刺倍率后的速度）
-                Rigidbody2D moRb = moPlayer.GetComponent<Rigidbody2D>();
-                Vector2 targetVelocity = moRb.velocity;
-
-                // 2. 距离补偿：如果箱子掉队了（距离变大），额外加一个“追赶力”
-                Vector2 catchUp = Vector2.zero;
-                if (dist > 1.1f) // 假设 1.0 是贴紧距离
-                {
-                    catchUp = directionToPlayer * (dist * 2f); 
-                }
-
-                rb.velocity = targetVelocity + catchUp;
-                return;
+                // 核心修复：直接取玩家速度，不要加额外的加速力，防止飞出去
+                targetVel = moPlayer.GetComponent<Rigidbody2D>().velocity;
+                isBeingInteracted = true;
             }
         }
 
-        // 停止拉取时，箱子立刻静止（或者你可以靠 Rigidbody 的 Drag）
-        rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, Time.fixedDeltaTime * 10f);
+        // --- Mi 的推送逻辑 ---
+        if (!isBeingInteracted && miPlayer != null)
+        {
+            float dist = Vector2.Distance(rb.position, miPlayer.GetComponent<Rigidbody2D>().position);
+            Vector2 dirToPlayer = (miPlayer.GetComponent<Rigidbody2D>().position - rb.position).normalized;
+
+            if (dist <= pullDistance && Vector2.Dot(miPlayer.currentInput, dirToPlayer) < -0.7f)
+            {
+                targetVel = miPlayer.GetComponent<Rigidbody2D>().velocity;
+                isBeingInteracted = true;
+            }
+        }
+
+        // --- 物理状态切换 ---
+        if (isBeingInteracted)
+        {
+            // 变成 Dynamic 才能和墙壁产生正常的 Collision 交互
+            rb.bodyType = RigidbodyType2D.Dynamic;
+            rb.velocity = targetVel;
+            // 增加阻尼，防止松手后滑太远
+            rb.drag = 0f; 
+        }
+        else
+        {
+            // 没人动时，变回 Kinematic 锁死
+            rb.velocity = Vector2.zero;
+            rb.bodyType = RigidbodyType2D.Kinematic;
+        }
     }
 }
